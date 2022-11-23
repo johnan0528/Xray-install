@@ -35,50 +35,60 @@ chown -R nobody:nogroup /etc/ssl/private/
 <details><summary>点击查看详细步骤</summary> 
 
 ```
-apt install -y socat
+apt update -y          #Debian/Ubuntu 命令
+apt install -y curl    #Debian/Ubuntu 命令
+apt install -y socat    #Debian/Ubuntu 命令
 ```
 
 ```
-curl https://get.acme.sh | sh
+yum update -y          #CentOS 命令
+yum install -y curl    #CentOS 命令
+yum install -y socat    #CentOS 命令
 ```
 
 ```
 alias acme.sh=~/.acme.sh/acme.sh
 ```
+-安装 Acme 脚本
+```
+curl https://get.acme.sh | sh
+```
+-1、安装 Acme 脚本之后，请先执行下面的命令（下面的邮箱为你的邮箱）
+```
+~/.acme.sh/acme.sh --register-account -m xxxx@xxxx.com
+```
+-80 端口空闲的验证申请
+-如果你还没有运行任何 web 服务, 80 端口是空闲的, 那么 Acme.sh 还能假装自己是一个 WebServer, 临时监听在 80 端口, 完成验证
+```
+~/.acme.sh/acme.sh  --issue -d mydomain.com   --standalone
+```
+-Nginx 的方式验证申请
+-这种方式需要你的服务器上面已经部署了 Nginx 环境，并且保证你申请的域名已经在 Nginx 进行了 conf 部署。（被申请的域名可以正常被打开）
+```
+~/.acme.sh/acme.sh --issue  -d mydomain.com   --nginx
+```
+-安装证书到指定文件夹
+-注意, 默认生成的证书都放在安装目录下: ~/.acme.sh/, 请不要直接使用此目录下的证书文件。
+-正确的使用方法是使用 --install-cert 命令,并指定目标位置, 然后证书文件会被copy到相应的位置，比如下面的代码
+```
+~/.acme.sh/acme.sh --installcert -d mydomain.com --key-file /root/private.key --fullchain-file /root/cert.crt
+```
+-上面的 /root/private.key 以及 /root/cert.crt 是把密钥和证书安装到 /root 目录，并改名为 private.key 和 cert.crt
 
+-升级 Acme.sh 到最新版本
 ```
-acme.sh --upgrade --auto-upgrade
+~/.acme.sh/acme.sh --upgrade
 ```
-
+-如果你不想手动升级, 可以开启自动升级:
 ```
-acme.sh --set-default-ca --server letsencrypt
+~/.acme.sh/acme.sh  --upgrade  --auto-upgrade
 ```
-
-```
-acme.sh --issue -d chika.example.com --standalone --keylength ec-256
-```
-
-```
-acme.sh --install-cert -d chika.example.com --ecc \
-```
-
-```
---fullchain-file /etc/ssl/private/fullchain.cer \
-```
-
-```
---key-file /etc/ssl/private/private.key
-```
-
-```
-chown -R nobody:nogroup /etc/ssl/private/
-```
-
+-之后, acme.sh 就会自动保持更新了.
 </details>
 
 - 备份已申请的SSL证书：使用WinSCP登录你的VPS，进入`/etc/ssl/private/`目录，下载证书文件`fullchain.cer`和私钥文件`private.key`。
 - SSL证书有效期是90天，每隔60几天会自动更新。[速率限制](https://letsencrypt.org/zh-cn/docs/rate-limits/)，超过次数会报错。
-
+- 需要下载VPS上申请的证书到本地,改名之后再通过Winscp登录vps上传到所需要的目录里面.
 2. 安装[Nginx](http://nginx.org/en/linux_packages.html)
 
 - Debian 10/11
